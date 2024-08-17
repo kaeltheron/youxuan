@@ -24,10 +24,6 @@ jobs:
           pip install ipwhois requests
 
       - name: Run Python script to update sgfd_ips.txt and DNS
-        env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          CF_ZONE_YID: ${{ secrets.CF_ZONE_YID }}
-          CF_DNS_NAME: ${{ secrets.CF_DNS_NAME }}
         run: python sgfdip.py
 
       - name: Configure Git
