@@ -116,7 +116,9 @@ def process_site_data(url):
 def filter_and_format_ips(ip_list):
     allip = []
     for ip in ip_list:
-        ip = ip.split('#')[0]  # 再次确保去除速度信息
+        ip = ip.split('#')[0]  
+        ip = ip.split('-')[0]
+        # 再次确保去除速度信息
     handler = ipinfo.getHandler()
     nodename = handler.getDetails(ip).country
     allip.append(f"{ip}#{nodename}")
@@ -133,7 +135,7 @@ def main():
     unique_data = list(set(all_data))
 
     # 过滤延迟数据低于150ms的行
-    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 150]
+    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 120]
 
     final_data = filter_and_format_ips(filtered_data)
 
