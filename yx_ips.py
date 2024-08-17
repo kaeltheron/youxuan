@@ -2,7 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import re
-from ipwhois import IPWhois
+import ipinfo
 
 
 # 定义请求头
@@ -117,13 +117,9 @@ def filter_and_format_ips(ip_list):
     allip = []
     for ip in ip_list:
         ip = ip.split('#')[0]  # 再次确保去除速度信息
-        try:
-            obj = IPWhois(ip)
-            results = obj.lookup_rdap()
-            nodename = results['network']['country']
-            allip.append(f"{ip}#{nodename}")
-        except Exception as e:
-            print(f"Error processing IP {ip}: {e}")
+    handler = ipinfo.getHandler()
+    nodename = handler.handle_ip(ip).country
+    allip.append(f"{ip}#{nodename}")
     return allip
 
 # 主函数，处理所有网站的数据
