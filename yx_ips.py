@@ -123,7 +123,7 @@ def main():
     unique_data = list(set(all_data))
 
     # 过滤延迟数据低于40ms的行
-    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 40]
+    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 100]
 
     # 写入到yx_ips.txt文件
     with open('yx_ips.txt', 'w', encoding='utf-8') as f:
