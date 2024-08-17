@@ -3,9 +3,6 @@ import os
 from ipwhois import IPWhois
 
 # 配置
-CF_API_KEY = os.getenv('CF_API_KEY')
-CF_ZONE_YID = os.getenv('CF_ZONE_YID')
-CF_DNS_NAME = os.getenv('CF_DNS_NAME')
 FILE_PATH = 'sgfd_ips.txt'
 SGCS_FILE_PATH = 'CloudflareST/sgcs.txt'
 
@@ -65,47 +62,7 @@ def write_to_file(ip_addresses):
         for ip in ip_addresses:
             f.write(ip + '\n')
 
-# 第四步：清除指定Cloudflare域名的所有DNS记录
-def clear_dns_records():
-    headers = {
-        'Authorization': f'Bearer {CF_API_KEY}',
-        'Content-Type': 'application/json',
-    }
 
-    # 获取现有的DNS记录
-    dns_records_url = f'https://api.cloudflare.com/client/v4/zones/{CF_ZONE_YID}/dns_records'
-    dns_records = requests.get(dns_records_url, headers=headers).json()
-
-    # 删除旧的DNS记录
-    for record in dns_records['result']:
-        if record['name'] == CF_DNS_NAME:
-            delete_url = f'https://api.cloudflare.com/client/v4/zones/{CF_ZONE_YID}/dns_records/{record["id"]}'
-            requests.delete(delete_url, headers=headers)
-
-# 第五步：更新Cloudflare域名的DNS记录为sgfd_ips.txt文件中的IP地址
-def update_dns_records():
-    with open(FILE_PATH, 'r') as f:
-        ips_to_update = [line.split('#')[0].strip() for line in f]
-
-    headers = {
-        'Authorization': f'Bearer {CF_API_KEY}',
-        'Content-Type': 'application/json',
-    }
-
-    dns_records_url = f'https://api.cloudflare.com/client/v4/zones/{CF_ZONE_YID}/dns_records'
-    for ip in ips_to_update:
-        data = {
-            'type': 'A',
-            'name': CF_DNS_NAME,
-            'content': ip,
-            'ttl': 60,
-            'proxied': False,
-        }
-        response = requests.post(dns_records_url, headers=headers, json=data)
-        if response.status_code == 200:
-            print(f"Successfully updated DNS record for {CF_DNS_NAME} to {ip}")
-        else:
-            print(f"Failed to update DNS record for {CF_DNS_NAME} to {ip}. Status code: {response.status_code}")
 
 # 主函数：按顺序执行所有步骤
 def main():
@@ -129,11 +86,6 @@ def main():
     # 第三步：将格式化后的新加坡IP地址写入文件
     write_to_file(unique_singapore_ips)
 
-    # 第四步：清除指定Cloudflare域名的所有DNS记录
-    clear_dns_records()
-
-    # 第五步：更新Cloudflare域名的DNS记录为sgfd_ips.txt文件中的IP地址
-    update_dns_records()
 
 if __name__ == "__main__":
     main()
