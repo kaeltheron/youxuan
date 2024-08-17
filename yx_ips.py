@@ -132,8 +132,8 @@ def main():
     # 去除重复的IP地址行
     unique_data = list(set(all_data))
 
-    # 过滤延迟数据低于40ms的行
-    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 100]
+    # 过滤延迟数据低于150ms的行
+    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 150]
 
     final_data = filter_and_format_ips(filtered_data)
 
