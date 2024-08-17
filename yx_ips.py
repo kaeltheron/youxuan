@@ -1,4 +1,4 @@
-import os
+=import os
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -119,9 +119,14 @@ def filter_and_format_ips(ip_list):
         ip = ip.split('#')[0]  
         ip = ip.split('-')[0]
         # 再次确保去除速度信息
-    handler = ipinfo.getHandler()
-    nodename = handler.getDetails(ip).country
-    allip.append(f"{ip}#{nodename}")
+        try:
+            handler = ipinfo.getHandler()
+            nodename = handler.getDetails(ip).country
+            allip.append(f"{ip}#{nodename}")
+        except Exception as e:
+            print(f"Error processing IP {ip}: {e}")
+            allip.append(f"{ip}")
+    
     return allip
 
 # 主函数，处理所有网站的数据
