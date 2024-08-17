@@ -140,7 +140,7 @@ def main():
     unique_data = list(set(all_data))
 
     # 过滤延迟数据低于150ms的行
-    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 120]
+    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 100]
 
     final_data = filter_and_format_ips(filtered_data)
 
