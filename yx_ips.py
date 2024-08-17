@@ -2,6 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import re
+from ipwhois import IPWhois
 
 
 # 定义请求头
@@ -112,6 +113,19 @@ def process_site_data(url):
 
     return data
 
+def filter_and_format_ips(ip_list):
+    allip = []
+    for ip in ip_list:
+        ip = ip.split('#')[0]  # 再次确保去除速度信息
+        try:
+            obj = IPWhois(ip)
+            results = obj.lookup_rdap()
+            nodename = results['network']['country']
+            allip.append(f"{ip}#{nodename}")
+        except Exception as e:
+            print(f"Error processing IP {ip}: {e}")
+    return allip
+
 # 主函数，处理所有网站的数据
 def main():
     all_data = []
@@ -125,9 +139,11 @@ def main():
     # 过滤延迟数据低于40ms的行
     filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 100]
 
+    final_data = filter_and_format_ips(filtered_data)
+
     # 写入到yx_ips.txt文件
     with open('yx_ips.txt', 'w', encoding='utf-8') as f:
-        for line in filtered_data:
+        for line in final_data:
             f.write(line + '\n')
 
 
