@@ -118,7 +118,7 @@ def filter_and_format_ips(ip_list):
     for ip in ip_list:
         ip = ip.split('#')[0]  # 再次确保去除速度信息
     handler = ipinfo.getHandler()
-    nodename = handler.handle_ip(ip).country
+    nodename = handler.getDetails(ip).country
     allip.append(f"{ip}#{nodename}")
     return allip
 
