@@ -3,11 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
-# Cloudflare API配置信息
-CF_API_KEY = os.getenv('CF_API_KEY')
-CF_ZONE_ID = os.getenv('CF_ZONE_ID')
-CF_DOMAIN_NAME = os.getenv('CF_DOMAIN_NAME')
-CF_API_EMAIL = os.getenv('CF_API_EMAIL')
 
 # 定义请求头
 headers = {
@@ -127,72 +122,14 @@ def main():
     # 去除重复的IP地址行
     unique_data = list(set(all_data))
 
-    # 过滤延迟数据低于100ms的行
-    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 100]
+    # 过滤延迟数据低于40ms的行
+    filtered_data = [line for line in unique_data if float(line.split('-')[-1].replace('ms', '')) < 40]
 
     # 写入到yx_ips.txt文件
     with open('yx_ips.txt', 'w', encoding='utf-8') as f:
         for line in filtered_data:
             f.write(line + '\n')
 
-    # 执行清空DNS记录的操作
-    clear_dns_records()
-    
-    # 从yx_ips.txt文件中提取IPv4地址
-    with open("yx_ips.txt", "r") as file:
-        ipv4 = [line.split('#')[0] for line in file if '#' in line]
-
-    # 执行添加DNS记录的操作
-    for ip in ipv4:
-        add_dns_record(ip)
-
-# 清空CF_DOMAIN_NAME的所有DNS记录
-def clear_dns_records():
-    url = f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records?name={CF_DOMAIN_NAME}"
-    headers = {
-        "Authorization": f"Bearer {CF_API_KEY}",
-        "X-Auth-Email": CF_API_EMAIL,
-        "Content-Type": "application/json"
-    }
-
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        records = response.json().get('result', [])
-        for record in records:
-            delete_url = f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records/{record['id']}"
-            delete_response = requests.delete(delete_url, headers=headers)
-            if delete_response.status_code == 200:
-                print(f"Successfully deleted DNS record: {record['id']}")
-            else:
-                print(f"Failed to delete DNS record: {record['id']}, status code: {delete_response.status_code}, response: {delete_response.text}")
-    else:
-        print(f"Failed to fetch DNS records, status code: {response.status_code}, response: {response.text}")
-
-# 添加新的IPv4地址为DNS记录，在 add_dns_record 函数中添加调试输出
-def add_dns_record(ip):
-    # 重新获取 ipv4 地址
-    with open("yx_ips.txt", "r") as file:
-        ipv4 = [line.split('#')[0] for line in file if '#' in line]
-
-    print(f"Adding DNS record for IP: {ip}")
-    url = f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records"
-    headers = {
-        "Authorization": f"Bearer {CF_API_KEY}",
-        "X-Auth-Email": CF_API_EMAIL,
-        "Content-Type": "application/json"
-    }
-    data = {
-        "type": "A",
-        "name": CF_DOMAIN_NAME,
-        "content": ip,
-        "ttl": 60,  # 设置TTL为1分钟
-        "proxied": False
-    }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code == 200:
-        print(f"Successfully created DNS record for IP: {ip}")
-    else:
-        print(f"Failed to create DNS record for IP: {ip}, status code: {response.status_code}, response: {response.text}")
 
 if __name__ == "__main__":
     main()
